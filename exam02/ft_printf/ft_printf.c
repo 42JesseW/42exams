@@ -18,8 +18,10 @@ typedef struct	s_convgroup
 {
 	t_conv		conversion;
 	char		*str;
+	int			str_len;
 	int			precision;
 	int			min_width;
+	int			total_length;
 }				t_convgroup;
 
 int		count_digits(int num)
@@ -125,7 +127,7 @@ char	*ft_itoa(int n, int base)
 	return (ft_strrev(a_str));
 }
 
-int		ft_atoi(char *str)
+int		ft_atoi(const char *str)
 {
 	int	idx;
 	int	num;
@@ -167,10 +169,16 @@ int		real_printf(const char *fmt, va_list args)
 		if (fmt[idx] == '%')
 		{
 			i = 1;
-			group = (t_convgroup){NONE, NULL, -1, -1};
+			group = (t_convgroup){NONE, NULL, 0, -1, -1, 0};
 			/* scan the following string for flags and update index appropriately */
 			while (fmt[idx + i] && !is_conversion(fmt[idx + i]))
 			{
+				/* found minimal width */
+				if (isdigit(fmt[idx + i]))
+				{
+					group.min_width = ft_atoi(fmt + i);
+					i += (count_digits(group.min_width) - 1);
+				}
 				/* found precision */
 				if (fmt[idx + i] == '.')
 				{
@@ -186,17 +194,14 @@ int		real_printf(const char *fmt, va_list args)
 						i += (count_digits(group.precision) - 1);
 					}
 				}
-				/* found minimal width */
-				if (isdigit(fmt[idx + i]))
-				{
-					group.min_width = ft_atoi(fmt + i);
-					i += (count_digits(group.min_width) - 1);
-				}
 				i++;
 			}
 
+			if (group.conversion == NONE)
+				group.conversion = fmt[idx + i + 1];
+
 			/* determine conversion type and get corresponding string */
-			switch (fmt[idx + i + 1])
+			switch (group.conversion)
 			{
 				case STRING:
 					group.str = va_arg(args, char *);
@@ -218,7 +223,39 @@ int		real_printf(const char *fmt, va_list args)
 				// error 
 			}
 
-			
+			group.str_len = ft_strlen(group.str);
+			group.total_length = (group.min_width > group.str_len) ? group.min_width : group.str_len;
+			if (group.conversion == STRING && group.precision < group.str_len)
+				group.str_len = group.precision;
+			if (group.conversion == NUMBER || group.conversion == HEXA)
+			{
+				if ((group.str_len + group.precision) > group.total_length)
+					group.total_length = group.str_len + group.precision;
+			}
+
+			int i = 0;
+			for (int idx = 0; idx < group.total_length; idx++)
+			{
+				if (group.conversion == STRING)
+				{
+					if (idx < (group.total_length - group.str_len))
+						ret = write(STDOUT_FILENO, " ", 1);
+					else
+					{
+						ret = write(STDOUT_FILENO, group.str + i, 1);
+						i++;
+					}
+				}
+				else
+				{
+					if (idx < (group.total_length - group.str_len))
+						ret = write(STDOUT_FILENO, " ", 1);
+					else if (group.precision > group.str_len)
+					{
+						
+					}
+				}
+			}
 		}
 		else
 		{
@@ -243,6 +280,9 @@ int		ft_printf(const char *fmt, ...)
 
 int		main(void)
 {
-	printf("number: %.4d\n", 200);
+	printf("number: %3.4x\n", 123);
+	printf("number: %30.4x\n", 123);
+	printf("number: %30.4d\n", 123);
+	printf("string: %30.10s\n", "tjehurthteutuiehteute");
 	return (0);
 }
