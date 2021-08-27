@@ -4,16 +4,13 @@
 int		main(void)
 {
 	char	*line;
-	int		idx;
-
-	idx = 0;
+	
 	line = get_next_line(0);
 	while (line != NULL)
 	{
-		printf("[%d]: %s\n", idx, line);
+		printf("%s\n", line);
 		free(line);
 		line = get_next_line(0);
-		idx++;
 	}
 	return (0);
 }

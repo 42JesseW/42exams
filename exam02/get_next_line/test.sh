@@ -19,7 +19,15 @@ do
 		echo -n -e "\t"
 	fi
 	gcc -D BUFFER_SIZE=$i $FLAGS main.c get_next_line.c -o $GNL_PROG
-	echo -n -e "COMPILATION SUCCESS\tLEAKS "
-	$LEAK_PROG $LEAK_PROG_FLAGS ./$GNL_PROG < file.txt &> out && cat out | grep 'ERROR SUMMARY'
+	echo -n -e "COMPILATION SUCCESS\t"
+
+	echo "DIFF"
+	diff <(./$GNL_PROG < file.txt) <(cat < file.txt)
+
+	if [ ! -z "$LEAK_PROG" ]; then
+		echo -n -e "LEAKS"
+		$LEAK_PROG $LEAK_PROG_FLAGS ./$GNL_PROG < file.txt &> out && cat out | grep 'ERROR SUMMARY'
+	fi
+	echo
 	rm get_next_line out
 done
