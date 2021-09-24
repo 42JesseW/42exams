@@ -1,5 +1,4 @@
 #include "get_next_line.h"
-#include <stdio.h>
 
 int		main(void)
 {
@@ -8,7 +7,7 @@ int		main(void)
 	line = get_next_line(0);
 	while (line != NULL)
 	{
-		printf("%s\n", line);
+		write(STDOUT_FILENO, line, ft_strlen(line));
 		free(line);
 		line = get_next_line(0);
 	}
