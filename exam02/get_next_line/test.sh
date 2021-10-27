@@ -7,6 +7,9 @@ GNL_PROG=get_next_line
 RANDOM_FILE_NAME=random.txt
 RANDOM_FILE_SIZE_KB=100000
 
+VERSION=1
+SRC_DIR=
+
 echo "----------------------------------------------"
 echo "             VARIABLE BUFFER_SIZE             "
 echo "----------------------------------------------"
